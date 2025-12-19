@@ -99,6 +99,7 @@ Once customized and built, the mod will automatically load through BepInEx when 
 ## Authors
 
 * Sparroh (MycoPunk mod collection maintainer)
+* Slidedrum (original mod author)
 * funlennysub (original BepInEx template)
 * [@DomPizzie](https://twitter.com/dompizzie) (README template)
 
