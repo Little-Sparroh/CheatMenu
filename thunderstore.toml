@@ -3,9 +3,9 @@ schemaVersion = "0.0.1"
 
 [package]
 namespace = "Sparroh"
-name = "PackageName"
-description = "Example mod description"
-websiteUrl = "https://github.com/Little-Sparroh/SkipIntro"
+name = "CheatMenu"
+description = "A comprehensive cheat menu mod for MycoPunk that provides various cheats, utilities, and quality-of-life improvements for gameplay."
+websiteUrl = "https://github.com/Little-Sparroh/CheatMenu"
 containsNsfwContent = false
 
 [package.dependencies]
@@ -17,8 +17,8 @@ readme = "README.md"
 outdir = "build"
 
 [[build.copy]]
-source = "bin/Release/net48/MycopunkModTemplate.dll"
-target = "BepInEx/plugins/MycopunkModTemplate.dll"
+source = "bin/Release/net48/CheatMenu.dll"
+target = "BepInEx/plugins/CheatMenu.dll"
 
 [[build.copy]]
 source = "CHANGELOG.md"

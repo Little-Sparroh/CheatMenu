@@ -13,7 +13,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 [MycoMod(null, ModFlags.IsClientSide | ModFlags.IsSandbox)]
-[BepInPlugin("slidedrum.cheatmenu", "CheatMenu", "1.0.1")]
+[BepInPlugin("slidedrum.cheatmenu", "CheatMenu", "1.0.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static ManualLogSource Logger;
