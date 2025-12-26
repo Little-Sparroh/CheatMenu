@@ -67,7 +67,10 @@ A successor to Slidedrum's MenuMod2. A comprehensive cheat menu mod for MycoPunk
 
 ## Author
 
-Sparroh
+- Sparroh (Forked Mod Author)
+- Slidedrum (Original Mod Author)
+- funlennysub (BepInEx template)
+- [@DomPizzie](https://twitter.com/dompizzie) (README template)
 
 ## Links
 
