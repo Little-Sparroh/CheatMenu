@@ -1,10 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using Pigeon;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Pigeon.Movement;
@@ -13,9 +11,13 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 [MycoMod(null, ModFlags.IsClientSide | ModFlags.IsSandbox)]
-[BepInPlugin("slidedrum.cheatmenu", "CheatMenu", "1.0.0")]
-public class Plugin : BaseUnityPlugin
+[BepInPlugin(PluginGUID, PluginName, PluginVersion)]
+public class SparrohPlugin : BaseUnityPlugin
 {
+    public const string PluginGUID = "sparroh.cheatmenu";
+    public const string PluginName = "CheatMenu";
+    public const string PluginVersion = "1.0.0";
+    
     public static ManualLogSource Logger;
     public InputActionMap _actionmap;
     private InputAction _openMenu;
@@ -36,9 +38,8 @@ public class Plugin : BaseUnityPlugin
     private void Awake()
     {
         Logger = base.Logger;
-        MenuMod2Manager.Logger = Logger;
 
-        Harmony.CreateAndPatchAll(typeof(Plugin));
+        Harmony.CreateAndPatchAll(typeof(SparrohPlugin));
 
         SceneManager.sceneLoaded += OnSceneLoaded;
 
@@ -46,6 +47,8 @@ public class Plugin : BaseUnityPlugin
         _openMenu = _actionmap.AddAction("OpenMenu");
         _openMenu.AddBinding("<Keyboard>/backquote");
         _openMenu.performed += _ => toggleMenu();
+        
+        Logger.LogInfo($"{PluginName} loaded");
     }
 
     private void Update()
@@ -88,8 +91,7 @@ public class Plugin : BaseUnityPlugin
             {
                 return;
             }
-
-            Logger.LogInfo("Creating CheatMenu!");
+            
             if (Global.Instance != null)
             {
             }
@@ -102,6 +104,7 @@ public class Plugin : BaseUnityPlugin
             {
                 MissionsMenu.CreateMissionsMenu(mainMenu);
                 UpgradesMenu.CreateUpgradesMenu(mainMenu);
+                OuroborosMenu.CreateOuroborosMenu(mainMenu);
                 ProgressionMenu.CreateProgressionMenu(mainMenu);
             }
         }
@@ -158,33 +161,40 @@ public class Plugin : BaseUnityPlugin
 
     public void toggleMenu()
     {
-        if (MenuMod2Manager.currentMenu != null)
+        try
         {
-            MenuMod2Manager.currentMenu.Close();
-        }
-        else
-        {
-            if (mainMenu == null)
+            if (MenuMod2Manager.currentMenu != null)
             {
-                if (PlayerData.ProfileConfig.Instance != null)
+                MenuMod2Manager.currentMenu.Close();
+            }
+            else
+            {
+                if (mainMenu == null)
                 {
-                    FieldInfo field = typeof(PlayerData.ProfileConfig).GetField("profileIndex",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (field != null)
+                    if (PlayerData.ProfileConfig.Instance != null)
                     {
-                        int profileIndex = (int)field.GetValue(PlayerData.ProfileConfig.Instance);
-                        if (profileIndex != 0)
+                        FieldInfo field = typeof(PlayerData.ProfileConfig).GetField("profileIndex",
+                            BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (field != null)
                         {
-                            createMainMenu();
+                            int profileIndex = (int)field.GetValue(PlayerData.ProfileConfig.Instance);
+                            if (profileIndex != 0)
+                            {
+                                createMainMenu();
+                            }
                         }
                     }
                 }
-            }
 
-            if (mainMenu != null)
-            {
-                mainMenu.Open();
+                if (mainMenu != null)
+                {
+                    mainMenu.Open();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Exception in toggleMenu: {ex.Message}");
         }
     }
 
@@ -245,26 +255,33 @@ public class Plugin : BaseUnityPlugin
 
     public static void ApplyActiveCheats()
     {
-        if (Player.LocalPlayer == null) return;
-
-        if (god)
+        try
         {
-            Player.LocalPlayer.SetMaxHealth(999999f);
-            MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 999999f });
-            MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 999999f });
+            if (Player.LocalPlayer == null) return;
+
+            if (god)
+            {
+                Player.LocalPlayer.SetMaxHealth(999999f);
+                MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 999999f });
+                MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 999999f });
+            }
+
+            if (sprintFast)
+            {
+                Player.LocalPlayer.DefaultMoveSpeed = 100;
+            }
+
+            if (superJump)
+            {
+                FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
+                field.SetValue(Player.LocalPlayer, 100f);
+            }
         }
-
-        if (sprintFast)
+        catch (Exception ex)
         {
-            Player.LocalPlayer.DefaultMoveSpeed = 100;
-        }
-
-        if (superJump)
-        {
-            FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(Player.LocalPlayer, 100f);
+            Logger.LogError($"Exception in ApplyActiveCheats: {ex.Message}");
         }
     }
 
@@ -272,10 +289,17 @@ public class Plugin : BaseUnityPlugin
     [HarmonyPostfix]
     static void GetModifierCountPostfix(int seed, ref int __result)
     {
-        var forced = forcedModifiers;
-        if (forced != null && forced.Count > 0)
+        try
         {
-            __result += forced.Count;
+            var forced = forcedModifiers;
+            if (forced != null && forced.Count > 0)
+            {
+                __result += forced.Count;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Exception in GetModifierCountPostfix: {ex.Message}");
         }
     }
 
@@ -283,21 +307,28 @@ public class Plugin : BaseUnityPlugin
     [HarmonyPostfix]
     static void GetModifiersPostfix(Span<int> indices, int seed, Mission mission, int startIndex, int count, bool allowStacking)
     {
-        var forced = forcedModifiers;
-        if (forced != null && forced.Count > 0 && indices.Length >= forced.Count)
+        try
         {
-            for (int i = 0; i < forced.Count && i < indices.Length; i++)
+            var forced = forcedModifiers;
+            if (forced != null && forced.Count > 0 && indices.Length >= forced.Count)
             {
-                var modifierIndex = Global.Instance.MissionModifiers.IndexOf(forced[i]);
-                if (modifierIndex >= 0)
+                for (int i = 0; i < forced.Count && i < indices.Length; i++)
                 {
-                    for (int j = indices.Length - 1; j > i; j--)
+                    var modifierIndex = Global.Instance.MissionModifiers.IndexOf(forced[i]);
+                    if (modifierIndex >= 0)
                     {
-                        indices[j] = indices[j - 1];
+                        for (int j = indices.Length - 1; j > i; j--)
+                        {
+                            indices[j] = indices[j - 1];
+                        }
+                        indices[i] = modifierIndex;
                     }
-                    indices[i] = modifierIndex;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Exception in GetModifiersPostfix: {ex.Message}");
         }
     }
 }

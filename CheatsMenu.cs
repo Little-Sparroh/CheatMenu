@@ -8,12 +8,8 @@ using UnityEngine;
 
 public static class CheatsMenu
 {
-    private static ManualLogSource Logger = Plugin.Logger;
-
     public static void CreateCheatsMenu(MenuMod2Menu parentMenu)
     {
-        Logger.LogInfo("Creating CHEATS menu");
-
         MenuMod2Menu cheatsMenu = new MenuMod2Menu("CHEATS", parentMenu);
 
         {
@@ -39,91 +35,113 @@ public static class CheatsMenu
         cheatsMenu.addButton("Spawn swarm", () => SpawnMenu.spawnSwarm(10));
         cheatsMenu.addButton("Clean up parts", () => cleanUpParts());
         cheatsMenu.addButton("Clean up collectables", () => cleanUpCollectables());
+        cheatsMenu.addButton("Clear lost loot upgrades", () => clearLostLootUpgrades());
         cheatsMenu.addButton("Give max resources", () => giveAllResoruces());
     }
 
     public static void toggleGod(MM2Button button = null)
     {
-        if (Plugin.god)
+        try
         {
-            Player.LocalPlayer.SetMaxHealth(37.5f);
-            MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 37.5f });
-            MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 37.5f });
-            Plugin.god = false;
-        }
-        else
-        {
-            Player.LocalPlayer.SetMaxHealth(999999f);
-            MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 999999f });
-            MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
-            setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 999999f });
-            Plugin.god = true;
-        }
-        if (button != null)
-        {
-            if (Plugin.god)
+            if (SparrohPlugin.god)
             {
-                button.changeColour(Color.green);
+                Player.LocalPlayer.SetMaxHealth(37.5f);
+                MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 37.5f });
+                MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 37.5f });
+                SparrohPlugin.god = false;
             }
             else
             {
-                button.changeColour(Color.red);
+                Player.LocalPlayer.SetMaxHealth(999999f);
+                MethodInfo setHealthClient = typeof(Player).GetMethod("SetHealth_Client", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthClient?.Invoke(Player.LocalPlayer, new object[] { 999999f });
+                MethodInfo setHealthOwner = typeof(Player).GetMethod("SetHealth_Owner", BindingFlags.NonPublic | BindingFlags.Instance);
+                setHealthOwner?.Invoke(Player.LocalPlayer, new object[] { 999999f });
+                SparrohPlugin.god = true;
             }
+            if (button != null)
+            {
+                if (SparrohPlugin.god)
+                {
+                    button.changeColour(Color.green);
+                }
+                else
+                {
+                    button.changeColour(Color.red);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in toggleGod: {ex.Message}");
         }
     }
 
     public static void toggleSprintFast(MM2Button b = null)
     {
-        if (Plugin.sprintFast)
+        try
         {
-            Player.LocalPlayer.DefaultMoveSpeed = 10;
-            Plugin.sprintFast = false;
-        }
-        else
-        {
-            Player.LocalPlayer.DefaultMoveSpeed = 100;
-            Plugin.sprintFast = true;
-        }
-        if (b != null)
-        {
-            if (Plugin.sprintFast)
+            if (SparrohPlugin.sprintFast)
             {
-                b.changeColour(Color.green);
+                Player.LocalPlayer.DefaultMoveSpeed = 10;
+                SparrohPlugin.sprintFast = false;
             }
             else
             {
-                b.changeColour(Color.red);
+                Player.LocalPlayer.DefaultMoveSpeed = 100;
+                SparrohPlugin.sprintFast = true;
             }
+            if (b != null)
+            {
+                if (SparrohPlugin.sprintFast)
+                {
+                    b.changeColour(Color.green);
+                }
+                else
+                {
+                    b.changeColour(Color.red);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in toggleSprintFast: {ex.Message}");
         }
     }
 
     public static void toggleSuperJump(MM2Button b = null)
     {
-        if (Plugin.superJump)
+        try
         {
-            FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(Player.LocalPlayer, 14f);
-            Plugin.superJump = false;
-        }
-        else
-        {
-            FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(Player.LocalPlayer, 100f);
-            Plugin.superJump = true;
-        }
-        if (b != null)
-        {
-            if (Plugin.superJump)
+            if (SparrohPlugin.superJump)
             {
-                b.changeColour(Color.green);
+                FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
+                field.SetValue(Player.LocalPlayer, 14f);
+                SparrohPlugin.superJump = false;
             }
             else
             {
-                b.changeColour(Color.red);
+                FieldInfo field = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
+                field.SetValue(Player.LocalPlayer, 100f);
+                SparrohPlugin.superJump = true;
             }
+            if (b != null)
+            {
+                if (SparrohPlugin.superJump)
+                {
+                    b.changeColour(Color.green);
+                }
+                else
+                {
+                    b.changeColour(Color.red);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in toggleSuperJump: {ex.Message}");
         }
     }
 
@@ -173,36 +191,9 @@ public static class CheatsMenu
         }
     }
 
-    public static void setAirJump(bool enabled, MM2Button b = null) // TODO BROKEN
-    {
-        if (enabled)
-        {
-            FieldInfo airJumps = typeof(Player).GetField("airJumps", BindingFlags.NonPublic | BindingFlags.Instance);
-            FieldInfo airJumpSpeed = typeof(Player).GetField("airJumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            object airJumpsValue = airJumps.GetValue(Player.LocalPlayer);
-            if (Convert.ToInt32(airJumpsValue) != 100)
-                Plugin.previousAirJumps = Convert.ToInt32(airJumpsValue);
-            object airJumpSpeedValue = airJumpSpeed.GetValue(Player.LocalPlayer);
-            float currentSpeed = Convert.ToSingle(airJumpSpeedValue);
-            if (currentSpeed != 100f)
-                Plugin.previousAirJumpSpeed = currentSpeed;
-            airJumps.SetValue(Player.LocalPlayer, 100);
-
-            FieldInfo jumpSpeed = typeof(Player).GetField("jumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            airJumpSpeed.SetValue(Player.LocalPlayer, jumpSpeed.GetValue(Player.LocalPlayer));
-        }
-        else
-        {
-            FieldInfo field = typeof(Player).GetField("airJumps", BindingFlags.NonPublic | BindingFlags.Instance);
-            field.SetValue(Player.LocalPlayer, Plugin.previousAirJumps);
-            FieldInfo airJumpSpeedField = typeof(Player).GetField("airJumpSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-            airJumpSpeedField.SetValue(Player.LocalPlayer, Plugin.previousAirJumpSpeed);
-        }
-    }
-
     public static void enemySpawning(bool enabled, MM2Button b = null)
     {
-        var em = Plugin.GetEnemyManager();
+        var em = SparrohPlugin.GetEnemyManager();
         if (em != null)
         {
             if (enabled)
@@ -217,64 +208,113 @@ public static class CheatsMenu
 
     public static MM2Button toggleSpawning(MM2Button b = null)
     {
-        var em = Plugin.GetEnemyManager();
-        if (em != null)
+        try
         {
-            FieldInfo field = typeof(EnemyManager).GetField("enableAmbientWave", BindingFlags.NonPublic | BindingFlags.Instance);
-            if ((bool)field.GetValue(em))
+            var em = SparrohPlugin.GetEnemyManager();
+            if (em != null)
             {
-                em.DisableSpawning();
-                if (b != null)
+                FieldInfo field = typeof(EnemyManager).GetField("enableAmbientWave", BindingFlags.NonPublic | BindingFlags.Instance);
+                if ((bool)field.GetValue(em))
                 {
-                    b.changeColour(Color.red);
+                    em.DisableSpawning();
+                    if (b != null)
+                    {
+                        b.changeColour(Color.red);
+                    }
+                }
+                else
+                {
+                    em.EnableSpawning();
+                    if (b != null)
+                    {
+                        b.changeColour(Color.green);
+                    }
                 }
             }
             else
             {
-                em.EnableSpawning();
-                if (b != null)
-                {
-                    b.changeColour(Color.green);
-                }
             }
+            return b;
         }
-        else
+        catch (Exception ex)
         {
+            SparrohPlugin.Logger.LogError($"Exception in toggleSpawning: {ex.Message}");
+            return b;
         }
-        return b;
     }
 
     public static void killAllEnemies(MM2Button b = null)
     {
-        var em = Plugin.GetEnemyManager();
-        if (em != null)
-            em.KillAllEnemies_Server();
+        try
+        {
+            var em = SparrohPlugin.GetEnemyManager();
+            if (em != null)
+                em.KillAllEnemies_Server();
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in killAllEnemies: {ex.Message}");
+        }
     }
 
     public static void cleanUpParts(MM2Button b = null)
     {
-        List<EnemyPart> enemyParts = GameObject.FindObjectsOfType<EnemyPart>().ToList();
-        foreach (var part in enemyParts)
+        try
         {
-            part.Kill(DamageFlags.Despawn);
+            List<EnemyPart> enemyParts = GameObject.FindObjectsOfType<EnemyPart>().ToList();
+            foreach (var part in enemyParts)
+            {
+                part.Kill(DamageFlags.Despawn);
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in cleanUpParts: {ex.Message}");
         }
     }
 
     public static void cleanUpCollectables(MM2Button b = null)
     {
-        List<ClientCollectable> collectables = GameObject.FindObjectsOfType<ClientCollectable>().ToList();
-        foreach (var part in collectables)
+        try
         {
-            part.DespawnTrackedObject();
+            List<ClientCollectable> collectables = GameObject.FindObjectsOfType<ClientCollectable>().ToList();
+            foreach (var part in collectables)
+            {
+                part.DespawnTrackedObject();
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in cleanUpCollectables: {ex.Message}");
+        }
+    }
+
+    public static void clearLostLootUpgrades(MM2Button b = null)
+    {
+        try
+        {
+            PlayerData.Instance.rentedUpgrades.Clear();
+            SparrohPlugin.Logger.LogInfo("Cleared all rented upgrades from lost loot machine");
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in clearLostLootUpgrades: {ex.Message}");
         }
     }
 
     public static void giveAllResoruces(MM2Button b = null)
     {
-        var allResources = Global.Instance.PlayerResources;
-        foreach (var resource in allResources)
+        try
         {
-            PlayerData.Instance.AddResource(resource, resource.Max);
+            var allResources = Global.Instance.PlayerResources;
+            foreach (var resource in allResources)
+            {
+                PlayerData.Instance.AddResource(resource, resource.Max);
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in giveAllResoruces: {ex.Message}");
         }
     }
 }

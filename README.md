@@ -1,108 +1,78 @@
-# [Slide] - CheatMenu
+# CheatMenu
 
-A comprehensive cheat menu mod for MycoPunk that provides various cheats, utilities, and quality-of-life improvements for gameplay.
+A successor to Slidedrum's MenuMod2. A comprehensive cheat menu mod for MycoPunk that provides various cheats, utilities, and quality-of-life improvements for gameplay.
 
-## Description
+## Installation
 
-CheatMenu is a client-side BepInEx mod that adds an in-game menu accessible via the backquote (`) key. The menu provides access to various cheats and utilities including player enhancements, spawn controls, enemy management, mission modifiers, upgrades, and progression tools.
+### Via Thunderstore (Recommended)
 
-### Features
+1. Install [BepInEx](https://github.com/BepInEx/BepInEx) version 5.4.2403 or compatible.
+2. Download and install CheatMenu from Thunderstore Mod Manager.
+3. Launch the game.
 
-#### Player Cheats
-- **God Mode**: Invincibility with maximum health
-- **Fast Sprint**: Increased movement speed
-- **Super Jump**: Enhanced jump height and speed
-- **Air Jump**: Unlimited mid-air jumps
+### Manual Installation
 
-#### Spawn & Enemy Controls
-- Spawn various enemies and NPCs
-- Toggle enemy spawning on/off
-- Kill all enemies
-- Spawn enemy swarms
-- Clean up parts and collectables
+1. Install [BepInEx](https://github.com/BepInEx/BepInEx) version 5.4.2403 or compatible.
+2. Download the latest release from [GitHub](https://github.com/Little-Sparroh/CheatMenu).
+3. Extract the .dll file to `<MycoPunk Directory>/BepInEx/plugins/`.
 
-#### Mission & Progression
-- Force mission modifiers
-- Access upgrades menu
-- Progression controls
-- Mission management tools
+## Usage
 
-### Usage
-1. Launch MycoPunk with BepInEx installed
-2. Use a profile other than the default profile
-3. In-game, press the **backquote key (`)** to open/close the cheat menu
-4. Navigate through the menu options
-5. Toggle cheats on/off as desired
+- Press the backquote key (`) to open the cheat menu.
+- Navigate through the menus to access various cheats and utilities.
+- The mod requires a non-default profile to function.
 
-## Getting Started
+## Features
 
-### Dependencies
+### CHEATS Menu
+- Godmode: Toggle invincibility
+- Super sprint: Toggle fast movement speed
+- Super jump: Toggle enhanced jump height
+- Toggle enemy spawning: Enable/disable enemy waves
+- Kill all enemies: Remove all active enemies
+- Spawn swarm: Spawn a group of enemies
+- Clean up parts: Remove enemy parts from the environment
+- Clean up collectables: Remove collectable items
+- Clear lost loot upgrades: Remove temporary upgrades from lost loot
+- Give max resources: Grant maximum amounts of all player resources
 
-* MycoPunk (base game)
-* [BepInEx](https://github.com/BepInEx/BepInEx) - Version 5.4.2403 or compatible
-* .NET Framework 4.8
-* [HarmonyLib](https://github.com/pardeike/Harmony) (included via NuGet)
+### SPAWN Menu
+- **Enemies**: Spawn bosses (Amalgamation, Cranius) or standard enemies
+- **Vehicles**: Spawn Dart kart or WheelBox
+- **Objects**: Spawn various items like Saxitos bags, radio, barrel, training dummy, etc.
 
-### Building/Compiling
+### MISSIONS Menu
+- Force modifiers: Select mission modifiers to force on missions
+- Load mission: Select and load specific missions in different regions
 
-1. Clone this repository and customize the following:
-   - Rename namespace and class names appropriately
-   - Modify PluginGUID to be unique (format: "author.modname")
-   - Update PluginName and PluginVersion
-   - Add your specific Harmony patches and functionality
+### UPGRADES Menu
+- **Gear Upgrades**: Grant upgrades for weapons and equipment by category
+- **Character Upgrades**: Grant upgrades for playable characters
+- **Universal Upgrades**: Grant general player upgrades
 
-2. Add any additional NuGet packages or references needed for your mod
+### OUROBOROS Menu
+- Temporary versions of gear, character, and universal upgrades (removed after mission)
 
-3. Open the solution file in Visual Studio, Rider, or your preferred C# IDE
+### PROGRESSION Menu
+- Give missing upgrades: Grant all uncollected upgrades
+- Unlock locked skills: Unlock all skill tree abilities
+- Unlock weapons: Unlock gear that hasn't been collected yet
+- Level management: Set weapon and character levels (up to 30 or individual adjustment)
 
-4. Build the project in Release mode to generate the .dll file
+## Requirements
 
-Alternatively, use dotnet CLI:
-```bash
-dotnet build --configuration Release
-```
+- MycoPunk (base game)
+- [BepInEx](https://github.com/BepInEx/BepInEx) - Version 5.4.2403 or compatible
+- .NET Framework 4.8
 
-### Installing
+## Author
 
-**For distribution as a completed mod:**
+Sparroh
 
-**Option 1: Via Thunderstore (Recommended)**
-1. Update `thunderstore.toml` with your mod's specific information
-2. Publish using Thunderstore CLI or mod manager
-3. Users download and install via Thunderstore Mod Manager
+## Links
 
-**Option 2: Manual Distribution**
-1. Package the built .dll, any config files, and README
-2. Users place the .dll in their `<MycoPunk Directory>/BepInEx/plugins/` folder
-
-**Note:** The mod loads automatically when the game starts. Ensure you're using a non-default profile for full functionality.
-
-### Executing program
-
-Once customized and built, the mod will automatically load through BepInEx when the game starts. Check the BepInEx console for loading confirmation messages.
-
-### Mod Development Structure
-
-- **Plugin.cs:** Main plugin class with Awake method and Harmony initialization
-- **thunderstore.toml:** Publishing configuration for Thunderstore
-- **CSPROJECT.csproj:** Build configuration with proper references
-- **Resources:** Icon and documentation placeholders
-
-## Help
-
-* **First time modding?** Check BepInEx documentation and MycoPunk modding resources
-* **Harmony patches failing?** Ensure method signatures match the game's IL
-* **Dependency issues?** Update NuGet packages and verify .NET runtime version
-* **Thunderstore publishing?** Update all metadata in thunderstore.toml before publishing
-* **Plugin not loading?** Check BepInEx logs for errors and verify GUID uniqueness
-
-## Authors
-
-* Sparroh (MycoPunk mod collection maintainer)
-* Slidedrum (original mod author)
-* funlennysub (original BepInEx template)
-* [@DomPizzie](https://twitter.com/dompizzie) (README template)
+- [GitHub Repository](https://github.com/Little-Sparroh/CheatMenu)
 
 ## License
 
-* This project is licensed under the MIT License - see the LICENSE.md file for details
+This project is licensed under the MIT License - see the LICENSE file for details.

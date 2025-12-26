@@ -2,19 +2,20 @@ using System;
 using BepInEx.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Pigeon.Movement;
 using UnityEngine;
 
-public static class UpgradesMenu
+public static class OuroborosMenu
 {
-    public static void CreateUpgradesMenu(MenuMod2Menu parentMenu)
+    public static void CreateOuroborosMenu(MenuMod2Menu parentMenu)
     {
         try
         {
             const string debugPattern =
                 @"(_test_|_dev_|_wip|debug|temp|placeholder|todo|_old|_backup|_copy|\.skinasset$|^test_|roachard)";
-            MenuMod2Menu upgradesMenu = new MenuMod2Menu("UPGRADES", parentMenu);
+            MenuMod2Menu ouroborosMenu = new MenuMod2Menu("OUROBOROS", parentMenu);
 
             var gearByType = Global.Instance.AllGear
                 .Where(g => g.Info.Upgrades.Count > 0)
@@ -24,12 +25,12 @@ public static class UpgradesMenu
             foreach (var gearGroup in gearByType)
             {
                 var typeName = gearGroup.Key.ToString();
-                var gearTypeMenu = new MenuMod2Menu(typeName, upgradesMenu);
+                var gearTypeMenu = new MenuMod2Menu("Ouro " + typeName, ouroborosMenu);
 
                 foreach (var gear in gearGroup.OrderBy(g => g.Info.Name))
                 {
                     var gearInfo = gear.Info;
-                    var individualGearMenu = new MenuMod2Menu(gearInfo.Name, gearTypeMenu);
+                    var individualGearMenu = new MenuMod2Menu("Ouro " + gearInfo.Name, gearTypeMenu);
 
                     var allGearUpgrades = gearInfo.Upgrades
                     .Where(u => !Regex.IsMatch(u.Name, debugPattern, RegexOptions.IgnoreCase) || SparrohPlugin.sparrohMode)
@@ -55,11 +56,11 @@ public static class UpgradesMenu
                 }
             }
 
-            MenuMod2Menu charactersMenu = new MenuMod2Menu("Characters", upgradesMenu);
+            MenuMod2Menu charactersMenu = new MenuMod2Menu("Ouro Characters", ouroborosMenu);
             foreach (var character in Global.Instance.Characters)
             {
                 var gearInfo = character.Info;
-                var individualCharMenu = new MenuMod2Menu(gearInfo.Name, charactersMenu);
+                var individualCharMenu = new MenuMod2Menu("Ouro " + gearInfo.Name, charactersMenu);
 
                 var allCharacterUpgrades = character.Info.Upgrades
                     .Where(u => !Regex.IsMatch(u.Name, debugPattern, RegexOptions.IgnoreCase) || SparrohPlugin.sparrohMode)
@@ -84,7 +85,7 @@ public static class UpgradesMenu
                 }
             }
 
-            MenuMod2Menu specificGeneric = new MenuMod2Menu("Universal", charactersMenu);
+            MenuMod2Menu specificGeneric = new MenuMod2Menu("Ouro Universal", charactersMenu);
 
             try
             {
@@ -145,98 +146,12 @@ public static class UpgradesMenu
             }
             catch (System.Exception ex)
             {
-                SparrohPlugin.Logger.LogError($"Exception in universal upgrade menu creation: {ex.Message}\n{ex.StackTrace}");
+                SparrohPlugin.Logger.LogError($"Exception in ouroboros universal upgrade menu creation: {ex.Message}\n{ex.StackTrace}");
             }
         }
         catch (Exception ex)
         {
-            SparrohPlugin.Logger.LogError($"Exception in CreateUpgradesMenu: {ex.Message}");
-        }
-    }
-
-    public static void giveAllUpgrades(MM2Button b = null)
-    {
-        try
-        {
-            foreach (var gear in Global.Instance.AllGear)
-            {
-                var gearInfo = gear.Info;
-                foreach (var upgrade in gearInfo.Upgrades)
-                {
-                    if (upgrade.UpgradeType != Upgrade.Type.Invalid && upgrade.UpgradeType != Upgrade.Type.Cosmetic)
-                    {
-                        var iUpgrade = new UpgradeInstance(upgrade, gear);
-                        PlayerData.CollectInstance(iUpgrade, PlayerData.UnlockFlags.Hidden);
-                        iUpgrade.Unlock(true);
-                    }
-                }
-            }
-            SparrohPlugin.SendTextChatMessageToClient("All upgrades for weapons are added silently.");
-        }
-        catch (Exception ex)
-        {
-            SparrohPlugin.Logger.LogError($"Exception in giveAllUpgrades: {ex.Message}");
-        }
-    }
-
-    public static void giveAllCosmetics(MM2Button b = null)
-    {
-        try
-        {
-            const string debugPattern = @"(_test_|_dev_|_wip|debug|temp|placeholder|todo|_old|_backup|_copy|\.skinasset$|^test_)";
-            foreach (var gear in Global.Instance.AllGear)
-            {
-                var gearInfo = gear.Info;
-                foreach (var upgrade in gearInfo.Upgrades)
-                {
-                    if (upgrade.UpgradeType != Upgrade.Type.Cosmetic ||
-                        Regex.IsMatch(upgrade.Name, debugPattern, RegexOptions.IgnoreCase))
-                        continue;
-                    var iUpgrade = new UpgradeInstance(upgrade, gear);
-                    PlayerData.CollectInstance(iUpgrade, PlayerData.UnlockFlags.Hidden);
-                    iUpgrade.Unlock(true);
-                }
-            }
-
-            foreach (var gear in Global.Instance.Characters)
-            {
-                var gearInfo = gear.Info;
-                foreach (var upgrade in gearInfo.Upgrades)
-                {
-                    if (upgrade.UpgradeType != Upgrade.Type.Cosmetic ||
-                        Regex.IsMatch(upgrade.Name, debugPattern, RegexOptions.IgnoreCase))
-                        continue;
-
-                    var iUpgrade = new UpgradeInstance(upgrade, gear);
-                    PlayerData.CollectInstance(iUpgrade, PlayerData.UnlockFlags.Hidden);
-                    iUpgrade.Unlock(true);
-                }
-            }
-
-            if (Global.Instance.DropPod != null)
-            {
-                var dropPodUpgradable = (IUpgradable)Global.Instance.DropPod;
-                var gearInfo = dropPodUpgradable.Info;
-                if (gearInfo != null)
-                {
-                    foreach (var upgrade in gearInfo.Upgrades)
-                    {
-                        if (upgrade.UpgradeType == Upgrade.Type.Cosmetic &&
-                            !Regex.IsMatch(upgrade.Name, debugPattern, RegexOptions.IgnoreCase))
-                        {
-                            var iUpgrade = new UpgradeInstance(upgrade, dropPodUpgradable);
-                            PlayerData.CollectInstance(iUpgrade, PlayerData.UnlockFlags.Hidden);
-                            iUpgrade.Unlock(true);
-                        }
-                    }
-                }
-            }
-
-            SparrohPlugin.SendTextChatMessageToClient("All cosmetics for characters, weapons, and drop pod are added silently.");
-        }
-        catch (Exception ex)
-        {
-            SparrohPlugin.Logger.LogError($"Exception in giveAllCosmetics: {ex.Message}");
+            SparrohPlugin.Logger.LogError($"Exception in CreateOuroborosMenu: {ex.Message}");
         }
     }
 
@@ -246,6 +161,7 @@ public static class UpgradesMenu
         {
             var iUpgrade = new UpgradeInstance(upgrade, gear);
             PlayerData.CollectInstance(iUpgrade, PlayerData.UnlockFlags.Hidden);
+            SetRented(iUpgrade);
             iUpgrade.Unlock(true);
         }
         catch (Exception ex)
@@ -260,6 +176,7 @@ public static class UpgradesMenu
         {
             var iUpgrade = new UpgradeInstance(upgrade, gear);
             PlayerData.CollectInstance(iUpgrade);
+            SetRented(iUpgrade);
             iUpgrade.Unlock(true);
         }
         catch (Exception ex)
@@ -273,6 +190,7 @@ public static class UpgradesMenu
         try
         {
             UpgradeInstance upgradeInstance = PlayerData.CollectInstance(character, upgrade, PlayerData.UnlockFlags.Hidden);
+            SetRented(upgradeInstance);
             upgradeInstance.Seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             upgradeInstance.Unlock(false);
             PlayerData.Instance.TotalSkillPointsSpent += 1;
@@ -294,14 +212,38 @@ public static class UpgradesMenu
             IUpgradable gear = Global.Instance;
             UpgradeInstance upgradeInstance = new UpgradeInstance(upgrade, gear);
             PlayerData.CollectInstance(upgradeInstance, PlayerData.UnlockFlags.Hidden);
+            SetRented(upgradeInstance);
             upgradeInstance.Seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
             upgradeInstance.Unlock(true);
             ((PlayerUpgrade)upgrade).Apply(Player.LocalPlayer, upgradeInstance);
-            SparrohPlugin.SendTextChatMessageToClient("Universal upgrade added silently.");
+            SparrohPlugin.SendTextChatMessageToClient("Ouroboros universal upgrade added silently.");
         }
         catch (Exception ex)
         {
             SparrohPlugin.Logger.LogError($"Exception in giveUniversalUpgrade: {ex.Message}");
         }
+    }
+
+    private static void SetRented(UpgradeInstance upgradeInstance)
+    {
+        try
+        {
+            PropertyInfo removeProp = typeof(UpgradeInstance).GetProperty("RemoveAfterMission", BindingFlags.Public | BindingFlags.Instance);
+            if (removeProp != null)
+            {
+                removeProp.SetValue(upgradeInstance, true);
+                SparrohPlugin.Logger.LogInfo($"Set RemoveAfterMission to true for {upgradeInstance.Upgrade.Name}");
+            }
+            else
+            {
+                SparrohPlugin.Logger.LogWarning("RemoveAfterMission property not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Failed to set RemoveAfterMission: {ex.Message}");
+        }
+        PlayerData.Instance.rentedUpgrades.Add(upgradeInstance);
+        SparrohPlugin.Logger.LogInfo($"Added to rentedUpgrades. Count: {PlayerData.Instance.rentedUpgrades.Count}");
     }
 }

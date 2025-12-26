@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Sparroh"
 name = "CheatMenu"
-description = "A comprehensive cheat menu mod for MycoPunk that provides various cheats, utilities, and quality-of-life improvements for gameplay."
+description = "A successor to Slidedrum's MenuMod2. A comprehensive cheat menu mod for MycoPunk that provides various cheats, utilities, and quality-of-life improvements for gameplay."
 websiteUrl = "https://github.com/Little-Sparroh/CheatMenu"
 containsNsfwContent = false
 

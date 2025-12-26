@@ -9,7 +9,6 @@ using UnityEngine.UI;
 
 public static class MenuMod2Manager
 {
-    internal static new ManualLogSource Logger;
     public static List<MenuMod2Menu> allMenus;
     public static MenuMod2Menu currentMenu = null;
 }
@@ -24,78 +23,97 @@ public class MenuMod2Menu
     public List<MenuMod2Menu> subMenus;
     public MenuMod2Menu(string indetifier, MenuMod2Menu _parrentMenu = null)
     {
-        menuName = indetifier;
-        if (MenuMod2Manager.allMenus == null)
+        try
         {
-            MenuMod2Manager.allMenus = new List<MenuMod2Menu>();
-        }
-        foreach (var menu in MenuMod2Manager.allMenus)
-        {
-            if (menu.menuName == indetifier)
+            menuName = indetifier;
+            if (MenuMod2Manager.allMenus == null)
             {
-                throw new Exception($"Menu with name {indetifier} already exists.");
+                MenuMod2Manager.allMenus = new List<MenuMod2Menu>();
+            }
+            foreach (var menu in MenuMod2Manager.allMenus)
+            {
+                if (menu.menuName == indetifier)
+                {
+                    throw new Exception($"Menu with name {indetifier} already exists.");
+                }
+            }
+            MenuMod2Manager.allMenus.Add(this);
+            buttons = new List<MM2Button>();
+            menuCanvas = new GameObject("menuCanvas");
+            GameObject.DontDestroyOnLoad(menuCanvas);
+
+            Canvas canvas = menuCanvas.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+            menuCanvas.AddComponent<CanvasScaler>();
+            menuCanvas.AddComponent<GraphicRaycaster>();
+
+            if (_parrentMenu != null)
+            {
+                parrentMenu = _parrentMenu;
+                parrentMenu.subMenus ??= new List<MenuMod2Menu>();
+                parrentMenu.subMenus.Add(this);
+                thisButton = parrentMenu.addButton(indetifier, () => { this.Open(); });
+                this.addButton("Back", () => { parrentMenu.Open(); }).changeColour(Color.grey).changeSuffix($" ({parrentMenu.menuName})").changePrefix($"[{menuName}]\n");
+            }
+            else if (indetifier == "Main Menu")
+            {
+                this.addButton("Close", () => { this.Close(); }).changeColour(Color.red);
+                parrentMenu = null;
             }
         }
-        MenuMod2Manager.allMenus.Add(this);
-        buttons = new List<MM2Button>();
-        menuCanvas = new GameObject("menuCanvas");
-        GameObject.DontDestroyOnLoad(menuCanvas);
-
-        Canvas canvas = menuCanvas.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-        menuCanvas.AddComponent<CanvasScaler>();
-        menuCanvas.AddComponent<GraphicRaycaster>();
-
-        if (_parrentMenu != null)
+        catch (Exception ex)
         {
-            parrentMenu = _parrentMenu;
-            parrentMenu.subMenus ??= new List<MenuMod2Menu>();
-            parrentMenu.subMenus.Add(this);
-            Plugin.Logger.LogDebug($"Creating menu {indetifier} under {_parrentMenu.menuName}");
-            thisButton = parrentMenu.addButton(indetifier, () => { this.Open(); });
-            this.addButton("Back", () => { parrentMenu.Open(); }).changeColour(Color.grey).changeSuffix($" ({parrentMenu.menuName})").changePrefix($"[{menuName}]\n");
-        }
-        else if (indetifier == "Main Menu")
-        {
-            Plugin.Logger.LogDebug($"Creating menu {indetifier}");
-            this.addButton("Close", () => { this.Close(); }).changeColour(Color.red);
-            parrentMenu = null;
+            SparrohPlugin.Logger.LogError($"Exception in MenuMod2Menu constructor: {ex.Message}");
         }
     }
     public void Open()
     {
-        Plugin.Logger.LogDebug($"Opening menu: {menuName ?? "unkown"}");
-        if (MenuMod2Manager.currentMenu != null && MenuMod2Manager.currentMenu != this)
+        try
         {
-            MenuMod2Manager.currentMenu.Close();
+            SparrohPlugin.Logger.LogDebug($"Opening menu: {menuName ?? "unkown"}");
+            if (MenuMod2Manager.currentMenu != null && MenuMod2Manager.currentMenu != this)
+            {
+                MenuMod2Manager.currentMenu.Close();
+            }
+            MenuMod2Manager.currentMenu = this;
+            UnityEngine.Cursor.visible = true;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            foreach (var button in buttons)
+            {
+                button.show();
+            }
         }
-        MenuMod2Manager.currentMenu = this;
-        UnityEngine.Cursor.visible = true;
-        UnityEngine.Cursor.lockState = CursorLockMode.None;
-        foreach (var button in buttons)
+        catch (Exception ex)
         {
-            button.show();
+            SparrohPlugin.Logger.LogError($"Exception in Open(): {ex.Message}");
         }
     }
     public void Close()
     {
-        if (MenuMod2Manager.currentMenu != this)
+        try
         {
-            Plugin.Logger.LogWarning($"Attempted to close menu \"{menuName}\" that wasn't open.  This should not happen");
-            return;
-        }
-        Plugin.Logger.LogDebug($"Closing menu: {menuName}");
-        MenuMod2Manager.currentMenu = null;
+            if (MenuMod2Manager.currentMenu != this)
+            {
+                SparrohPlugin.Logger.LogWarning($"Attempted to close menu \"{menuName}\" that wasn't open.  This should not happen");
+                return;
+            }
+            SparrohPlugin.Logger.LogDebug($"Closing menu: {menuName}");
+            MenuMod2Manager.currentMenu = null;
 
-        if (Player.LocalPlayer != null && Player.LocalPlayer.PlayerLook.EnableMenuCamera == 0)
-        {
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
+            if (Player.LocalPlayer != null && Player.LocalPlayer.PlayerLook.EnableMenuCamera == 0)
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            foreach (var button in buttons)
+            {
+                button.hide();
+            }
         }
-        foreach (var button in buttons)
+        catch (Exception ex)
         {
-            button.hide();
+            SparrohPlugin.Logger.LogError($"Exception in Close(): {ex.Message}");
         }
     }
     public MenuMod2Menu hasMenu(string menuName)
@@ -136,106 +154,128 @@ public class MenuMod2Menu
     }
     public void destroy()
     {
-        var tempMenus = new List<MenuMod2Menu>(MenuMod2Manager.allMenus);
-        foreach (var menu in tempMenus)
+        try
         {
-            if (menu.menuName == this.menuName)
+            var tempMenus = new List<MenuMod2Menu>(MenuMod2Manager.allMenus);
+            foreach (var menu in tempMenus)
             {
-                MenuMod2Manager.allMenus.Remove(menu);
+                if (menu.menuName == this.menuName)
+                {
+                    MenuMod2Manager.allMenus.Remove(menu);
+                }
             }
-        }
-        if (MenuMod2Manager.currentMenu == this)
-        {
-            var backButton = this.buttons.FirstOrDefault(b => b.name == "back");
-            if (backButton == null)
+            if (MenuMod2Manager.currentMenu == this)
             {
-                this.Close();
+                var backButton = this.buttons.FirstOrDefault(b => b.name == "back");
+                if (backButton == null)
+                {
+                    this.Close();
+                }
+                else
+                {
+                    backButton.button.onClick.Invoke();
+                }
             }
-            else
+            var tempParrentButtons = new List<MM2Button>(parrentMenu?.buttons ?? new List<MM2Button>());
+            foreach (var button in tempParrentButtons)
             {
-                backButton.button.onClick.Invoke();
+                if (button.name == this.thisButton.name)
+                {
+                    parrentMenu.buttons.Remove(button);
+                }
             }
-        }
-        var tempParrentButtons = new List<MM2Button>(parrentMenu?.buttons ?? new List<MM2Button>());
-        foreach (var button in tempParrentButtons)
-        {
-            if (button.name == this.thisButton.name)
+            var buttonsToRemove = new List<MM2Button>(buttons);
+            foreach (var button in buttonsToRemove)
             {
-                parrentMenu.buttons.Remove(button);
+                GameObject.Destroy(button.buttonObj);
+                buttons.Remove(button);
             }
-        }
-        var buttonsToRemove = new List<MM2Button>(buttons);
-        foreach (var button in buttonsToRemove)
-        {
-            GameObject.Destroy(button.buttonObj);
-            buttons.Remove(button);
-        }
-        var subMenusToDestroy = subMenus ?? new List<MenuMod2Menu>();
-        foreach (var subMenu in subMenusToDestroy)
-        {
-            subMenu.destroy();
-        }
+            var subMenusToDestroy = subMenus ?? new List<MenuMod2Menu>();
+            foreach (var subMenu in subMenusToDestroy)
+            {
+                subMenu.destroy();
+            }
 
-        GameObject.Destroy(menuCanvas);
+            GameObject.Destroy(menuCanvas);
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in destroy(): {ex.Message}");
+        }
     }
     public bool removeButton(string buttonName)
     {
-        var buttonToRemove = buttons.FirstOrDefault(b => b.name == buttonName);
-        if (buttonToRemove != null)
+        try
         {
-            buttons.Remove(buttonToRemove);
-            GameObject.Destroy(buttonToRemove.buttonObj);
-            arrangeButtons();
-            return true;
+            var buttonToRemove = buttons.FirstOrDefault(b => b.name == buttonName);
+            if (buttonToRemove != null)
+            {
+                buttons.Remove(buttonToRemove);
+                GameObject.Destroy(buttonToRemove.buttonObj);
+                arrangeButtons();
+                return true;
+            }
+            return false;
         }
-        return false;
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in removeButton(): {ex.Message}");
+            return false;
+        }
     }
     public void arrangeButtons()
     {
-        int buttonSizeX = 200;
-        int buttonSizeY = 50;
-        int spacing = 5;
-
-        Vector2 spiralOrigin = new Vector2(0, 0);
-
-        int currentGridX = 0;
-        int currentGridY = 0;
-
-        int stepX = 1;
-        int stepY = 0;
-
-        int stepsInCurrentDirection = 1;
-        int stepsTaken = 0;
-        int directionChangeCount = 0;
-
-        for (int i = 0; i < buttons.Count; i++)
+        try
         {
+            int buttonSizeX = 200;
+            int buttonSizeY = 50;
+            int spacing = 5;
 
-            Vector2 buttonPosition = new Vector2(
-                currentGridX * (buttonSizeX + spacing),
-                currentGridY * -(buttonSizeY + spacing)
-            );
-            buttons[i].move(buttonPosition + spiralOrigin);
+            Vector2 spiralOrigin = new Vector2(0, 0);
 
-            currentGridX += stepX;
-            currentGridY += stepY;
-            stepsTaken++;
+            int currentGridX = 0;
+            int currentGridY = 0;
 
-            if (stepsTaken == stepsInCurrentDirection)
+            int stepX = 1;
+            int stepY = 0;
+
+            int stepsInCurrentDirection = 1;
+            int stepsTaken = 0;
+            int directionChangeCount = 0;
+
+            for (int i = 0; i < buttons.Count; i++)
             {
-                stepsTaken = 0;
 
-                int oldStepX = stepX;
-                stepX = -stepY;
-                stepY = oldStepX;
+                Vector2 buttonPosition = new Vector2(
+                    currentGridX * (buttonSizeX + spacing),
+                    currentGridY * -(buttonSizeY + spacing)
+                );
+                buttons[i].move(buttonPosition + spiralOrigin);
 
-                directionChangeCount++;
+                currentGridX += stepX;
+                currentGridY += stepY;
+                stepsTaken++;
 
-                if (directionChangeCount % 2 == 0)
+                if (stepsTaken == stepsInCurrentDirection)
                 {
-                    stepsInCurrentDirection++;
+                    stepsTaken = 0;
+
+                    int oldStepX = stepX;
+                    stepX = -stepY;
+                    stepY = oldStepX;
+
+                    directionChangeCount++;
+
+                    if (directionChangeCount % 2 == 0)
+                    {
+                        stepsInCurrentDirection++;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            SparrohPlugin.Logger.LogError($"Exception in arrangeButtons(): {ex.Message}");
         }
     }
 }
@@ -260,7 +300,6 @@ public class MM2Button
     }
     public MM2Button createButton()
     {
-        Plugin.Logger.LogDebug($"Creating button: {name} in menu {menu.menuName}");
         buttonObj = new GameObject("MenuButton");
         buttonObj.transform.SetParent(canvas.transform, false);
         RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
@@ -305,7 +344,7 @@ public class MM2Button
         }
         else
         {
-            Plugin.Logger.LogWarning("Button text component not found, cannot update text.");
+            SparrohPlugin.Logger.LogWarning("Button text component not found, cannot update text.");
         }
         return this;
     }
@@ -318,7 +357,7 @@ public class MM2Button
         }
         else
         {
-            Plugin.Logger.LogWarning("Button image component not found, cannot change color.");
+            SparrohPlugin.Logger.LogWarning("Button image component not found, cannot change color.");
         }
         return this;
     }
